@@ -1,0 +1,13 @@
+{
+    "n_epochs": 10,
+    "batch_size": 1,
+    "obs_len": 4,
+    "pred_len": 6,
+    "max_n_peds": 52,
+    "n_neighbor_pixels": 32,
+    "grid_side": 4,
+    "lstm_state_dim": 64,
+    "emb_dim": 32,
+    "data_root": "path/to/data/datasets",
+    "test_dataset_kind": "ucy"
+}
