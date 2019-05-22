@@ -1,37 +1,40 @@
 
-
+"""
+Created on Mon Jul 31 14:23:47 2017
+@author: Hao Xue
+"""
 
 import numpy as np
 import math
 
-
+# 矩形邻域
 def get_rectangular_occupancy_map(frame_ID, ped_ID, dimensions, neighborhood_size, grid_size, data):
     """
-    This function computes rectangular occupancy map for each pedestrian at each frame.
-    This occupancy map is used in group level LSTM.
-    params:
-        frame_ID: frame No.
-        ped_ID: each ped in frame_ID
-        dimensions : This will be a list [width, height], size of frame
-        neighborhood_size : Scalar value representing the size of neighborhood considered (32)
-        grid_size : Scalar value representing the size of the grid discretization (4)
-        data: data of pixel_pos.csv file, [frame_ID, ped_ID, y-coord, x-coord]
+    该函数用来计算每一帧中每个行人的矩形占用图
+	
+ 
+    参数:
+        frame_ID: 帧id.
+        ped_ID: 每个行人id
+        dimensions : 图片帧的尺寸
+        neighborhood_size : 标量值代表考虑的邻域大小，只考虑该范围内行人的影响
+        grid_size : 标量值表示网格离散化的大小
+        data: 数据格式，x，y坐标 
     """
-    #    width_bound, height_bound = neighborhood_size/(width*1.0), neighborhood_size/(height*1.0)
-    #    width_grid_bound, height_grid_bound = grid_size/(width*1.0), grid_size/(height*1.0)
+  
 
     o_map = np.zeros((int(neighborhood_size / grid_size), int(neighborhood_size / grid_size)))
-    #    o_map = np.zeros((int(neighborhood_size/grid_size)**2))
+ 
 
     ped_list = []
 
-    # search for all peds in the same frame
+    # 搜索同一帧中的所有的行人
     for i in range(len(data[0])):
         if data[0][i] == frame_ID:
             ped_list.append(data[:, i])
-    # reshape ped_list to [num of ped, 4], [frame_ID, ped_ID, y-coord, x-coord]
+  
     ped_list = np.reshape(ped_list, [-1, 4])
-
+    #根据目标人与其他人的二维平面距离来判断，即若其他人跟目标的平面坐标距离<阈值，则认为其他人在目标邻域内，否则，不在邻域内
     if len(ped_list) == 0:
         print('no pedestrian in this frame!')
     elif len(ped_list) == 1:
@@ -71,31 +74,25 @@ def cal_angle(current_x, current_y, other_x, other_y):
 
 def get_circle_occupancy_map(frame_ID, ped_ID, dimensions, neighborhood_radius, grid_radius, grid_angle, data):
     '''
-    This function computes rectangular occupancy map for each pedestrian at each frame.
-    This occupancy map is used in group level LSTM.
-    params:
-        frame_ID: frame No.
-        ped_ID: each ped in frame_ID
-        dimensions : This will be a list [width, height], size of frame
-        neighborhood_size : Scalar value representing the size of neighborhood considered (32)
-        grid_size : Scalar value representing the size of the grid discretization (4)
-        data: data of pixel_pos.csv file, [frame_ID, ped_ID, y-coord, x-coord]
+	
+    该函数用来计算每一帧中每个行人的圆形占用图
+	
     '''
     width, height = dimensions[0], dimensions[1]
     neighborhood_bound = neighborhood_radius / (min(width, height) * 1.0)
     grid_bound = grid_radius / (min(width, height) * 1.0)
     o_map = np.zeros((int(neighborhood_radius / grid_radius), int(360 / grid_angle)))
-    #    o_map = np.zeros((int(neighborhood_size/grid_size)**2))
+ 
 
     ped_list = []
 
-    # search for all peds in the same frame
+    # 搜索同一帧中的所有的行人
     for i in range(len(data[0])):
         if data[0][i] == frame_ID:
             ped_list.append(data[:, i])
-    # reshape ped_list to [num of ped, 4], [frame_ID, ped_ID, y-coord, x-coord]
-    ped_list = np.reshape(ped_list, [-1, 4])
 
+    ped_list = np.reshape(ped_list, [-1, 4])
+    # 根据目标人与其他人的欧式距离来判断，即欧式距离小于某一设定的阈值，则处于邻域内，否则不在邻域内
     if len(ped_list) == 0:
         print('no pedestrian in this frame!')
     elif len(ped_list) == 1:
@@ -121,54 +118,6 @@ def get_circle_occupancy_map(frame_ID, ped_ID, dimensions, neighborhood_radius, 
         return o_map
 
 
-def log_circle_occupancy_map(frame_ID, ped_ID, dimensions, neighborhood_radius, grid_radius, grid_angle, data):
-    """
-    This function computes occupancy map for each pedestrian at each frame.
-    This occupancy map is used in group level LSTM.
-    params:
-        frame_ID: frame No.
-        ped_ID: each ped in frame_ID
-        dimensions : This will be a list [width, height], size of frame
-        neighborhood_size : Scalar value representing the size of neighborhood considered (32)
-        grid_size : Scalar value representing the size of the grid discretization (4)
-        data: data of pixel_pos.csv file, [frame_ID, ped_ID, y-coord, x-coord]
-    """
-    width, height = dimensions[0], dimensions[1]
-    o_map = np.zeros((8, 8))
-    #    o_map = np.zeros((int(neighborhood_size/grid_size)**2))
 
-    ped_list = []
 
-    # search for all peds in the same frame
-    for i in range(len(data[0])):
-        if data[0][i] == frame_ID:
-            ped_list.append(data[:, i])
-    # reshape ped_list to [num of ped, 4], [frame_ID, ped_ID, y-coord, x-coord]
-    ped_list = np.reshape(ped_list, [-1, 4])
-
-    if len(ped_list) == 0:
-        print('no pedestrian in this frame!')
-    elif len(ped_list) == 1:
-        print('only one pedestrian in this frame!')
-        return o_map
-    else:
-        for pedIndex in range(len(ped_list)):
-            if ped_list[pedIndex][1] == ped_ID:
-                current_x, current_y = ped_list[pedIndex][-1], ped_list[pedIndex][-2]
-                current_index = pedIndex
-        for otherIndex in range(len(ped_list)):
-            if otherIndex != current_index:
-                other_x, other_y = ped_list[otherIndex][-1], ped_list[otherIndex][-2]
-                other_distance = math.sqrt(
-                    (other_x * width - current_x * width) ** 2 + (other_y * height - current_y * height) ** 2)
-                log_distance = math.log2(other_distance)
-                angle = cal_angle(current_x, current_y, other_x, other_y)
-                if other_distance >= 8:
-                    continue
-                cell_x = int(np.floor(log_distance))
-                cell_y = int(np.floor(angle / grid_angle))
-
-                o_map[cell_x, cell_y] += 1
-
-        return o_map
 

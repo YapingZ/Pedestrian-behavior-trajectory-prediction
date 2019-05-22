@@ -18,6 +18,8 @@ from vizualize_trajectories import visualize_trajectories
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '2'
 
+#默认测试结果文件保存的路径
+
 def _load_eval_args() -> Namespace:
     parser = ArgumentParser()
     parser.add_argument("--trained_model_config", type=str, default="data/results/20181123121153_circle/test=zara1/zara1.json")
@@ -38,17 +40,20 @@ def main() -> None:
     out_dir = os.path.join(os.path.dirname(args.trained_model_file), "eval")
     os.makedirs(out_dir, exist_ok=True)
 
-    # load data
+    # 加载数据
+	
     _, test_data = provide_train_test(config, is_test=is_test)
 
     obs_len_test, pred_len_test = obs_pred_split(
         config.obs_len, config.pred_len, *test_data)
 
-    # load trained model weights
+    # 加载训练权重
+	
     my_model = MySocialModel(config)
     my_model.train_model.load_weights(args.trained_model_file)
 
-    # first, predict `pred_len` sequences following observation sequence
+    # obs_len代表历史运动序列；`pred_len`代表预测序列
+	
     x_obs_len_test, _, grid_obs_len_test, zeros_obs_len_test = obs_len_test
     x_pred_len_test, *_ = pred_len_test
 
@@ -57,32 +62,31 @@ def main() -> None:
         batch_size=config.batch_size, verbose=1)
 
     # --------------------------------------------------------------------------
-    # visualization
+
     # --------------------------------------------------------------------------
 
     x_concat_test = np.concatenate([x_obs_len_test, x_pred_len_test], axis=1)
     x_concat_model = np.concatenate([x_obs_len_test, x_pred_len_model], axis=1)
 
-    # visualize true and predicted trajectories, and save as png files
+    # 将预测坐标保存至person_n.txt文件
     out_fig_dir = os.path.join(out_dir, "figs")
     os.makedirs(out_fig_dir, exist_ok=True)
     for s in range(len(x_concat_test)):
         fig = visualize_trajectories(x_concat_test[s], x_concat_model[s],
                                      config.obs_len, config.pred_len)
-        fig_file = os.path.join(out_fig_dir, "{0:04d}.png".format(s))
+        fig_file = os.path.join(out_fig_dir, "{0:04d}.person_n.txt".format(s))
         fig.savefig(fig_file)
         plt.close(fig)
 
     # --------------------------------------------------------------------------
-    # evaluation
+    # 评估指标
     # --------------------------------------------------------------------------
 
-    # evaluation
     ade = compute_abe(x_pred_len_test, x_pred_len_model)
     fde = compute_fde(x_pred_len_test, x_pred_len_model)
     report = {"ade": float(ade), "fde": float(fde)}
 
-    # write to a json file
+    # 将定性测试结果保存为一个json文件，包含平均位移误差和最终位移误差
     report_file = os.path.join(out_dir, "report.json")
     with open(report_file, "w") as f:
         json.dump(report, f)

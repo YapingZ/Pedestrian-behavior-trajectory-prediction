@@ -18,19 +18,19 @@ from provide_train_test import provide_train_test
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
-def load_train_args() -> Namespace:
+def load_train_args() -> Namespace:  #默认输入输出路径
     parser = ArgumentParser()
     parser.add_argument("--config", type=str, default="data/configs/zara1.json")
     parser.add_argument("--out_root", type=str, default="data/results")
     return parser.parse_args()
 
 
-def _make_weights_file_name(n_epochs: int) -> str:
+def _make_weights_file_name(n_epochs: int) -> str:   #返回训练权重
     return "social_train_model_e{0:04d}.h5".format(n_epochs)
 
-def plt_save_loss(config, out_dir, history_obj):
+def plt_save_loss(config, out_dir, history_obj):   #保存训练过程loss曲线图
 
-    # save loss plot
+
     plt.plot(history_obj["loss"])
     plt.plot(history_obj["val_loss"])
     plt.title("social model loss")
@@ -41,8 +41,8 @@ def plt_save_loss(config, out_dir, history_obj):
         config.test_dataset_kind)))
 
 def train_generator(input_list, batch_size):
-    """Generate batch with respect to array's first axis."""
-    start = 0  # pointer to where we are in iteration
+
+    start = 0  # 开始迭代的起始位置
 
     x_obs_len_train, grid_obs_len_train, zeros_obs_len_train, y_pred_len_train = input_list
     while True:
@@ -59,17 +59,17 @@ def train_generator(input_list, batch_size):
         yield [each_obs, each_grid, each_zeros], y_train
 
 def train_social_model(out_dir: str, config: ModelConfig) -> None:
-    # load data
+    # 加载数据
     train_data, test_data = provide_train_test(config)
 
-    # prepare train data
+    # 训练数据
     obs_len_train, pred_len_train = obs_pred_split(config.obs_len,
                                                    config.pred_len,
                                                    *train_data)
     x_obs_len_train, _, grid_obs_len_train, zeros_obs_len_train = obs_len_train
     _, y_pred_len_train, _, _ = pred_len_train
 
-    # prepare test data
+    # 测试数据
     obs_len_test, pred_len_test = obs_pred_split(config.obs_len,
                                                  config.pred_len,
                                                  *test_data)
@@ -78,20 +78,10 @@ def train_social_model(out_dir: str, config: ModelConfig) -> None:
 
     os.makedirs(out_dir, exist_ok=True)
 
-    # training
+    # 训练部分，加载历史运动轨迹，batch_size,训练批次
     my_model = MySocialModel(config)
     print(config.steps_per_epoch)
-    # history = my_model.train_model.fit_generator(
-    #     train_generator([x_obs_len_train, grid_obs_len_train, zeros_obs_len_train, y_pred_len_train], config.batch_size),
-    #     # batch_size=config.batch_size,
-    #     epochs=config.n_epochs,
-    #     verbose=1,
-    #     steps_per_epoch=config.steps_per_epoch,
-    #     validation_data=(
-    #         [x_obs_len_test, grid_obs_len_test, zeros_obs_len_test],
-    #         y_pred_len_test
-    #     )
-    # )
+
     history = my_model.train_model.fit(
         [x_obs_len_train, grid_obs_len_train, zeros_obs_len_train],
         y_pred_len_train,
@@ -105,7 +95,7 @@ def train_social_model(out_dir: str, config: ModelConfig) -> None:
         )
     )
 
-    # save the trained model weights
+    # 保存训练权重
     weights_file = os.path.join(out_dir,
                                 _make_weights_file_name(config.n_epochs))
     my_model.train_model.save_weights(weights_file)
@@ -113,7 +103,7 @@ def train_social_model(out_dir: str, config: ModelConfig) -> None:
     history_file = os.path.join(out_dir, "history.json")
     dump_json_file(history.history, history_file)
 
-    # save loss plot
+    # 保存训练过程loss曲线图
     plt_save_loss(config, out_dir, history.history)
 
 

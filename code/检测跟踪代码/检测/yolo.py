@@ -21,6 +21,8 @@ tracknum=[]
 allpeople=0
 savefile=open('person.vsp','w')
 framenum=0
+
+#加载训练好的模型
 class YOLO(object):
     _defaults = {
         "model_path": 'model_data/yolo.h5',
@@ -48,6 +50,9 @@ class YOLO(object):
         self.boxes, self.scores, self.classes = self.generate()
 
     def _get_class(self):
+        '''
+        读取类别名
+        '''
         classes_path = os.path.expanduser(self.classes_path)
         with open(classes_path) as f:
             class_names = f.readlines()
@@ -55,6 +60,9 @@ class YOLO(object):
         return class_names
 
     def _get_anchors(self):
+        '''
+        取anchors比率
+        '''
         anchors_path = os.path.expanduser(self.anchors_path)
         with open(anchors_path) as f:
             anchors = f.readline()
@@ -101,14 +109,15 @@ class YOLO(object):
                 len(self.class_names), self.input_image_shape,
                 score_threshold=self.score, iou_threshold=self.iou)
         return boxes, scores, classes
-
+#把行人框出来
     def detect_image(self, image,num):
         start = timer()
         humanplace=[]
+        # 保证图片的尺寸是32的倍数
         if self.model_image_size != (None, None):
             assert self.model_image_size[0]%32 == 0, 'Multiples of 32 required'
             assert self.model_image_size[1]%32 == 0, 'Multiples of 32 required'
-            boxed_image = letterbox_image(image, tuple(reversed(self.model_image_size)))
+            boxed_image = letterbox_image(image, tuple(reversed(self.model_image_size))) # resize image with unchanged aspect ratio using padding
         else:
             new_image_size = (image.width - (image.width % 32),
                               image.height - (image.height % 32))
@@ -116,6 +125,7 @@ class YOLO(object):
         image_data = np.array(boxed_image, dtype='float32')
 
         #print(image_data.shape)
+        # 归一化图像像素
         image_data /= 255.
         image_data = np.expand_dims(image_data, 0)  # Add batch dimension.
 
@@ -128,12 +138,14 @@ class YOLO(object):
             })
 
         #print('Found {} boxes for {}'.format(len(out_boxes), 'img'))
-
+        # 加载字体
         font = ImageFont.truetype(font='font/FiraMono-Medium.otf',
                     size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
-        thickness = (image.size[0] + image.size[1]) // 300
-        tempframe=str(num)+'\n'
+        thickness = (image.size[0] + image.size[1]) // 300 # 2
+        tempframe=str(num)+'\n' #
+        
 
+        # 画框
         hunamnum=0
         for i, c in reversed(list(enumerate(out_classes))):
             predicted_class = self.class_names[c]
@@ -190,6 +202,8 @@ class YOLO(object):
 
     def close_session(self):
         self.sess.close()
+
+
 def writedown(temppoint,humannum,recogframe,video_size):
     for k in range(0,humannum):
         # pointlist_x=[]
@@ -229,7 +243,13 @@ def writedown(temppoint,humannum,recogframe,video_size):
                 tempangle = 180
             tempstr=str(temp_x)+' '+str(temp_y)+' '+str(temppoint[k][m][2])+' '+str(tempangle)+' - (2D point, m_id)\n'
             savefile.write(tempstr)
-            #templong=np.sqrt(np.square(int(temppoint[k][m][0]-temppoint[k][m-1][0]))+np.square(int(temppoint[k][m][1]-temppoint[k][m-1][1])))
+            #保存行人的跟踪坐标
+
+
+
+
+
+
 
 
 def jugyment(temppoint, humannum,recogframe):
@@ -248,27 +268,42 @@ def jugyment(temppoint, humannum,recogframe):
             return 0
     return 1
 
+
+
+
+
+
+
+#
+#
+#
+#先视频分帧
+#调用上面的detect_image函数，把人框出来
+#用封装好的卡尔慢跟踪器根据相邻帧的相似度关系，把相似度高的归为同一人，进行跟踪
+
 def detect_video(yolo, video_path, output_path=""):
     import cv2
-    vid = cv2.VideoCapture(video_path)
-
+    vid = cv2.VideoCapture(video_path) #读取视频
+    
+    
     if not vid.isOpened():
         raise IOError("Couldn't open webcam or video")
-    video_FourCC    = int(vid.get(cv2.CAP_PROP_FOURCC))
-    video_fps       = vid.get(cv2.CAP_PROP_FPS)
-    video_size      = (int(vid.get(cv2.CAP_PROP_FRAME_WIDTH)),
+    video_FourCC    =  cv2.VideoWriter_fourcc(*'MPEG')  #保存视频格式mp4
+    video_fps       = vid.get(cv2.CAP_PROP_FPS)  #视频帧率
+    video_size      = (int(vid.get(cv2.CAP_PROP_FRAME_WIDTH)),  #图片大小
                         int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT)))
-    isOutput = True if output_path != "" else False
-    if isOutput:
-        print("!!! TYPE:", type(output_path), type(video_FourCC), type(video_fps), type(video_size))
-        out = cv2.VideoWriter(output_path, video_FourCC, video_fps, video_size)
+    out = cv2.VideoWriter('cuc1.mp4', video_FourCC, 24, video_size)  #以24秒/帧输出
+    #isOutput = True if output_path != "" else False
+    #if isOutput:
+        #print("!!! TYPE:", type(output_path), type(video_FourCC), type(video_fps), type(video_size))
+
     accum_time = 0
     curr_fps = 0
     fps = "FPS: ??"
     prev_time = timer()
 
     recogframe=100#保存多少帧的变量
-    p=0
+    p=0  #视频帧的启示
     k=0
     init_once = False
     humantrack=[]#人的位置
@@ -288,7 +323,7 @@ def detect_video(yolo, video_path, output_path=""):
         if k==0:#进入yolo检测人
             init_once = False
             image = Image.fromarray(frame)
-            image,huamanplace = yolo.detect_image(image,p)#返回图片和获取人的位置
+            image,huamanplace = yolo.detect_image(image,p)#调用上边detect_image函数，把人框出来，返回图片和获取人的位置
             p=p+1
             result = np.asarray(image)
             curr_time = timer()
@@ -303,6 +338,7 @@ def detect_video(yolo, video_path, output_path=""):
             cv2.putText(result, text=fps, org=(3, 15), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=0.50, color=(255, 0, 0), thickness=2)
             cv2.namedWindow("result", cv2.WINDOW_NORMAL)
+            #out.write(result)
             cv2.imshow("result", result)
 
         print(huamanplace)
@@ -323,9 +359,7 @@ def detect_video(yolo, video_path, output_path=""):
             init_once=True
 
         ok,boxes=trackers.update(frame)#更新追踪器 返回人的位置
-        #new=[[huamanplace[0][0],huamanplace[1][0]],[huamanplace[0][1],huamanplace[1][1]],[huamanplace[0][2],huamanplace[1][2]],[huamanplace[0][3],huamanplace[1][3]],[huamanplace[0][4],huamanplace[1][4]]]
-        #trackers=mot_tracker.update(huamanplace)
-
+      
 
         boxnum=0
         for newbox in boxes:#boxes为返回人的位置
@@ -339,6 +373,7 @@ def detect_video(yolo, video_path, output_path=""):
             humantrack.append(tempplace)
             for po in humantrack:
                 cv2.circle(frame,po,2,(0,255,0))
+        out.write(frame)
         cv2.imshow('1',frame)
         cv2.waitKey(20)
         if k==recogframe:#当到达100帧后写入一次人轨迹，k至0重新检测人
@@ -353,8 +388,8 @@ def detect_video(yolo, video_path, output_path=""):
                 writedown(temppoint,peoplenum,k-1,video_size)
                 temppoint=np.zeros((100,recogframe,3))
                 k = 0
-        if isOutput:
-            out.write(frame)
+
+        out.write(frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 

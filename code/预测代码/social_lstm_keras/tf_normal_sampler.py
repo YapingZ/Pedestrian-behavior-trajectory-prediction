@@ -6,22 +6,19 @@ from keras.layers import Reshape, Lambda, Concatenate
 
 
 def _to_normal2d(output_batch) -> ds.MultivariateNormalTriL:
-    """
-    :param output_batch: (n_samples, 5)
-    :return
-    """
 
-    # mean of x and y
+    #lambada匿名函数
+    # 求x 和 y的平均值
     x_mean = Lambda(lambda o: o[:, 0])(output_batch)
     y_mean = Lambda(lambda o: o[:, 1])(output_batch)
 
-    # std of x and y
-    # std is must be 0 or positive
+    # 求x 和 y的标准差，非负值
+
     x_std = Lambda(lambda o: K.exp(o[:, 2]))(output_batch)
     y_std = Lambda(lambda o: K.exp(o[:, 3]))(output_batch)
 
-    # correlation coefficient
-    # correlation coefficient range is [-1, 1]
+    # 相关系数，范围为[-1,1]
+ 
     cor = Lambda(lambda o: K.tanh(o[:, 4]))(output_batch)
 
     loc = Concatenate()([

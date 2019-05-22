@@ -31,26 +31,16 @@ def DarknetConv2D_BN_Leaky(*args, **kwargs):
         BatchNormalization(),
         LeakyReLU(alpha=0.1))
 
-def resblock_body(x, num_filters, num_blocks):
-    '''A series of resblocks starting with a downsampling Convolution2D'''
-    # Darknet uses left and top padding instead of 'same' mode
-    x = ZeroPadding2D(((1,0),(1,0)))(x)
-    x = DarknetConv2D_BN_Leaky(num_filters, (3,3), strides=(2,2))(x)
-    for i in range(num_blocks):
-        y = compose(
-                DarknetConv2D_BN_Leaky(num_filters//2, (1,1)),
-                DarknetConv2D_BN_Leaky(num_filters, (3,3)))(x)
-        x = Add()([x,y])
-    return x
+
 
 def darknet_body(x):
     '''Darknent body having 52 Convolution2D layers'''
     x = DarknetConv2D_BN_Leaky(32, (3,3))(x)
-    x = resblock_body(x, 16, 1)
-    x = resblock_body(x, 32, 2)
-    x = resblock_body(x, 64, 8)
-    x = resblock_body(x, 128, 8)
-    x = resblock_body(x, 256, 4)
+    x = resblock_body(x, 64, 1)
+    x = resblock_body(x, 128, 2)
+    x = resblock_body(x, 256, 8)
+    x = resblock_body(x, 512, 8)
+    x = resblock_body(x, 1024, 4)
     return x
 
 def make_last_layers(x, num_filters, out_filters):
@@ -117,6 +107,46 @@ def tiny_yolo_body(inputs, num_anchors, num_classes):
             DarknetConv2D(num_anchors*(num_classes+5), (1,1)))([x2,x1])
 
     return Model(inputs, [y1,y2])
+
+def resblock_body(x, num_filters, num_blocks):
+    '''A series of resblocks starting with a downsampling Convolution2D'''
+    # Darknet uses left and top padding instead of 'same' mode
+    x = ZeroPadding2D(((1,0),(1,0)))(x)
+    x = DarknetConv2D_BN_Leaky(num_filters, (3,3), strides=(2,2))(x)
+    for i in range(num_blocks):
+        y = compose(
+                DarknetConv2D_BN_Leaky(num_filters//2, (1,1)),
+                DarknetConv2D_BN_Leaky(num_filters, (3,3)))(x)
+        x = Add()([x,y])
+    return x
+
+def transition_module(x,num_filters):
+    y = compose(
+                DarknetConv2D_BN_Leaky(num_filters//2, (1,1)),
+                DarknetConv2D_BN_Leaky(num_filters, (3,3)))(x)
+    return y
+
+def  skk_body(inputs,num_anchors,num_classes):
+    x = compose(DarknetConv2D_BN_Leaky(16, (3,3)),
+                 MaxPooling2D(pool_size=(2,2), strides=(2,2), padding='same'),
+                 )(inputs)
+    x = resblock_body(x,32,4) # num_filter = 32, num_block=4   
+    x = transition_module(x,32)(x)
+
+    x = resblock_body(x,64,4)
+    x = transition_module(x,64)(x)
+
+    x = resblock_body(x,128,4)
+    x = transition_module(x,128)(x)
+
+    x = resblock_body(x,256,4)
+    x = transition_module(x,256)(x)
+
+    x = resblock_body(x,256,4)
+    x = transition_module(x,256)(x)
+
+    y = resblock_body(x,256,4)
+    return Model(inputs, y)
 
 
 def yolo_head(feats, anchors, num_classes, input_shape, calc_loss=False):
@@ -192,6 +222,8 @@ def yolo_eval(yolo_outputs,
               score_threshold=.6,
               iou_threshold=.5):
     """Evaluate YOLO model on given input and return filtered boxes."""
+    # 分数”表示该对象出现在grid cell中的可能性。“boxes”返回被检测对象的坐标(x1, y1, x2, y2)。“类”是已标识对象的类。
+    # 现在，让我们使用一个预先训练的YOLO算法对新图像，
     num_layers = len(yolo_outputs)
     anchor_mask = [[6,7,8], [3,4,5], [0,1,2]] if num_layers==3 else [[3,4,5], [1,2,3]] # default setting
     input_shape = K.shape(yolo_outputs[0])[1:3] * 32

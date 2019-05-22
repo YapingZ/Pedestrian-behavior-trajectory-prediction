@@ -37,10 +37,14 @@ def visualize_trajectories(y_true_s, y_pred_s, obs_len, pred_len):
         line_color = _get_line_color(i)
 
         # draw line
-        ax.plot(x_pos_pred, y_pos_pred, line_color, linestyle=":")
-        ax.plot(x_pos_true, y_pos_true, line_color)
+        #ax.plot(x_pos_pred, y_pos_pred, line_color, linestyle=":")
+        #ax.plot(x_pos_true, y_pos_true, line_color)
         # ax.scatter(x_pos_pred, y_pos_pred, c=line_color, marker=".")
         # ax.scatter(x_pos_true, x_pos_true, c=line_color)
+	data_path = './person.txt'
+	data_pos = open(data_path,'w')
+	data_pos.write(x_pos_pred,y_pos_pred)
+	
 
     # set figure bound
     x_min, x_max = 0.0, 1.0

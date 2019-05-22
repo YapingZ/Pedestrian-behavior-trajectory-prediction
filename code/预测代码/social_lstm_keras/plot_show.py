@@ -5,7 +5,7 @@ import numpy as np
 import os
 
 
-
+#检测跟踪可视化
 data_root = '../'
 
 file_path_dir = 'data/coor_real/*'
@@ -61,7 +61,7 @@ def plt_info_grid_circle(coor_xy, img, plt_save_path):
     plt.savefig(plt_save_path, dpi=1000, bbox_inches =extent, pad_inches = 0)
     plt.close()
 
-
+# 加载预测坐标文件
 def plt_show(avi_path, save_dir):
     file_path_dir = 'data/coor_real/others/*_4.txt'
     txt_dir = glob(file_path_dir)
@@ -129,20 +129,12 @@ def plt_loss_epoch(data_path):
     plt.ylim(0, 0.4)
     plt.title('social model loss')
     plt.legend()
-    # plt.axis('off')
-    # plt.savefig('data/results/rect.png')
-    # plt.savefig('data/results/circle.png')
-    plt.show()
+  
+    plt.show()   
 
 
 if __name__ == '__main__':
-    # avi_path = data_root + 'ucydata/zara/crowds_zara02.avi'
-    # avi_path = data_root + 'ucydata/test_others/04.mp4'
-    # save_dir = data_root + 'ucydata/zara/crowds_zara02_imgs/'
-    # save_dir = data_root + 'ucydata/test_others/04/'
 
-    # plt_show(avi_path, save_dir)
-    # read_and_save_imgs(avi_path, save_dir)
 
-    data_path = 'data/circle_data.txt'
+    data_path = 'data/circle_data.txt' 将训练过程存储在data/circle_data.txt文件
     plt_loss_epoch(data_path)
