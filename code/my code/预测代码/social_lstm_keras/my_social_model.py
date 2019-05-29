@@ -117,7 +117,7 @@ class MySocialModel:
                 prev_h_t = Lambda(lambda z: z[:, t, :, :])(self.zeros_input)
                 prev_c_t = Lambda(lambda z: z[:, t, :, :])(self.zeros_input)
 
-            # compute $H_t$ 计算共享隐藏状态？
+            # compute $H_t$ 共享隐藏状态
             # (n_samples, max_n_peds, (grid_side ** 2) * lstm_state_dim)
             H_t = self._compute_social_tensor(grid_t, prev_h_t, config)
 
@@ -138,8 +138,7 @@ class MySocialModel:
             #     emb_it = Concatenate()([e_it, a_it])
             #     emb_it = Reshape((1, 2 * config.emb_dim))(emb_it)
             #
-            #     # initial_state = h_i_tになっている
-            #     # h_i_tを次のx_t_pに対してLSTMを適用するときのinitial_stateに使えば良い
+ 
             #     prev_states_it = [prev_h_t[:, ped_index],
             #                       prev_c_t[:, ped_index]]
             #     lstm_output, h_it, c_it = self.lstm_layer(emb_it,
@@ -171,9 +170,7 @@ class MySocialModel:
         o_obs_batch = _stack_permute_axis_zero(o_obs_batch)
 
         # ----------------------------------------------------------------------
-        # Prediction 位置估计？
-        # ----------------------------------------------------------------------
-        # この時点でprev_h_t, prev_c_tにはobs_lenの最終的な状態が残っている
+
 
         x_obs_t_final = Lambda(lambda x: x[:, -1, :, :])(self.x_input)
         pid_obs_t_final = Lambda(lambda x_t: x_t[:, :, 0])(x_obs_t_final)
@@ -221,8 +218,7 @@ class MySocialModel:
             #     emb_it = Concatenate()([e_it, a_it])
             #     emb_it = Reshape((1, 2 * config.emb_dim))(emb_it)
             #
-            #     # initial_state = h_i_tになっている
-            #     # h_i_tを次のx_t_pに対してLSTMを適用するときのinitial_stateに使えば良い
+
             #     prev_states_it = [prev_h_t[:, i], prev_c_t[:, i]]
             #     lstm_output, h_it, c_it = self.lstm_layer(emb_it,
             #                                               prev_states_it)
@@ -255,7 +251,6 @@ class MySocialModel:
         # o_concat_batch = Lambda(lambda os: tf.concat(os, axis=1))(
         #     [o_obs_batch, o_pred_batch])
 
-        # 本当に学習に必要なモデルはこっちのはず
         self.train_model = Model(
             [self.x_input, self.grid_input, self.zeros_input],
             o_pred_batch
@@ -299,8 +294,7 @@ class MySocialModel:
             emb_it = Concatenate()([e_it, a_it])
             emb_it = Reshape((1, 2 * config.emb_dim))(emb_it)
 
-            # initial_state = h_i_tになっている
-            # h_i_tを次のx_t_pに対してLSTMを適用するときのinitial_stateに使えば良い
+         
             prev_states_it = [prev_h_t[:, ped_index], prev_c_t[:, ped_index]]
             lstm_output, h_it, c_it = self.lstm_layer(emb_it,
                                                       prev_states_it)

@@ -35,11 +35,11 @@ Set dataset attribute of the config files in `configs/.`
 
 ## Training
 Run train_social_model.py.
-> ```python train_social_model.py --config path/to/comfig.json [--out_root OUT_ROOT]```
+> ```python3 train_social_model.py --config ./data/configs/ucy.jason --out root ./data/result/20190527/test=ucy/social_train_model_e0010.h5```
 
 ## Testing
 Run evaluate_social_model.py
-> ```python train_social_model.py --trained_model_config path/to/config.json --trained_model_file path/to/trained_model.h5```
+> ```python3 evaluate_social_my_model.py  --trained_model_config  /home/leonard/skk/social_lstm_keras_tf-master/data/configs/other.json --trained_model_file   /home/leonard/skk/social_lstm_keras_tf-master/data/results/20190527/test=ucy/social_train_model_e0010.h5```
 
 ## Restrictions
 - work only on batch size = 1
