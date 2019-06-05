@@ -48,6 +48,7 @@ Run human_track_predict.py
 ## Restrictions
 - work only on batch size = 1
 - require much RAM (use almost all 16GB in my environment)
-##执行步骤
+
+## 执行步骤
 ![avatar](https://github.com/YapingZ/Pedestrian-behavior-trajectory-prediction/tree/master/picture/1.png)
 
