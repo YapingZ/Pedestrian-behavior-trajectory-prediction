@@ -10,7 +10,7 @@
 ```yolo.py ```
 
 -- 执行程序
-> run ```yolo_video.py ```
+> run ```yolo_video.py ``` 
 
 ## Preparation
 [voc数据集](http://host.robots.ox.ac.uk/pascal/VOC/)
@@ -41,6 +41,13 @@ Run train_social_model.py.
 Run evaluate_social_model.py
 > ```python3 evaluate_social_my_model.py  --trained_model_config  /home/leonard/skk/social_lstm_keras_tf-master/data/configs/other.json --trained_model_file   /home/leonard/skk/social_lstm_keras_tf-master/data/results/20190527/test=ucy/social_train_model_e0010.h5```
 
+## 融合模型执行文件
+Run human_track_predict.py
+> ```python3.5 human_track_predict.py --input test.mp4 ```
+
 ## Restrictions
 - work only on batch size = 1
 - require much RAM (use almost all 16GB in my environment)
+##执行步骤
+![avatar](/home/skk/1.png)
+
