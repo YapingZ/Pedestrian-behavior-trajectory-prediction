@@ -10,7 +10,7 @@
 ```yolo.py ```
 
 -- 执行程序
-> run ```yolo_video.py ``` 
+> run ```python3 yolo_video.py ``` 
 
 ## Preparation
 [voc数据集](http://host.robots.ox.ac.uk/pascal/VOC/)
@@ -41,7 +41,7 @@ Set dataset attribute of the config files in `configs/.`
 >run ```python3 train_social_model.py --config ./data/configs/ucy.jason --out root ./data/result/20190527/test=ucy/social_train_model_e0010.h5```
 
 ## Testing
-测试行人预测网络，运行下面语句，
+测试行人预测网络，运行下面语句
 Run evaluate_social_model.py， trained_model_config设置测试的超参数，trained_model_file路径指定测试使用的模型
 > run ```python3 evaluate_social_my_model.py  --trained_model_config  /home/leonard/skk/social_lstm_keras_tf-master/data/configs/other.json --trained_model_file   /home/leonard/skk/social_lstm_keras_tf-master/data/results/20190527/test=ucy/social_train_model_e0010.h5```
 
@@ -54,7 +54,7 @@ Run human_track_predict.py
 ## 论文模型和原来模型的对比
 （由于时间原因，只标注了一个视频，也是在校园里采集的，由于角度问题，行人的移动变化明显，所以便于可视化）
 
-下图对比了改进后的圆形邻域预测模型与原来的矩形邻域预测模型，
+下图对比了改进后的圆形邻域预测模型与原来的矩形邻域预测模型
 - 红色曲线是真实值;
 - 蓝色曲线是改进后的模型;
 - 绿色曲线是原来的矩形邻域模型。
