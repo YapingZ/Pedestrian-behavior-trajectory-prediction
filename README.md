@@ -1,12 +1,12 @@
-# Requirements
+# Requirements 运行环境
 
 - Python 3.6.0+
 - Keras 2.1.5+
 - TensorFlow 1.6.0+
 - Opencv3.4 + contrib
 ***
-# Pedestrian detection
--- 主程序
+# Pedestrian detection 行人检测
+-- yolo检测行人主程序
 ```yolo.py ```
 
 -- 执行程序
@@ -18,41 +18,46 @@
 按论文需求修改配置文件yolo.cfg、voc_annotation.py、voc_class.txt
 
 ##  Training
-Modify train.py and start training
+
+运行下面语句训练检测模型
 run ```python3 train.py```
 
-## Replacement weight
-将训练好的权重放在model_data路径下
+训练好的权重放在model_data路径下
 
 ## Testing
-Run yolo_video.py
-> ```python yolo_video.py --input test.mp4 --output test1.mp4```
+行人检测跟踪的测试，运行下面语句，input是输入视频，output是保存路径
+Run yolo_video.py 
+> ```python yolo_video.py --input test.mp4 --output cuc1.mp4```
 
 ***
-# Pedestrian prediction
-## Preparation
+# Pedestrian prediction 行人预测
+## Preparation 
+先设置config里面的配置文件
 Set dataset attribute of the config files in `configs/.`
 
 ## Training
+训练行人预测网络，运行下面语句，config设置网络超参数，out root路径保存模型
 Run train_social_model.py.
 > ```python3 train_social_model.py --config ./data/configs/ucy.jason --out root ./data/result/20190527/test=ucy/social_train_model_e0010.h5```
 
 ## Testing
-Run evaluate_social_model.py
+测试行人预测网络，运行下面语句，
+Run evaluate_social_model.py， trained_model_config设置测试的超参数，trained_model_file路径指定测试使用的模型
 > ```python3 evaluate_social_my_model.py  --trained_model_config  /home/leonard/skk/social_lstm_keras_tf-master/data/configs/other.json --trained_model_file   /home/leonard/skk/social_lstm_keras_tf-master/data/results/20190527/test=ucy/social_train_model_e0010.h5```
 
 ## 融合模型执行文件
-Run human_track_predict.py
+测试融合模型，运行下面语句，input是待测试视频
+Run human_track_predict.py 
 > ```python3.5 human_track_predict.py --input test.mp4 ```
-
-## Restrictions
-- work only on batch size = 1
-- require much RAM (use almost all 16GB in my environment)
 
 
 ## 论文模型和原来模型的对比
+（由于时间原因，只标注了一个视频，也是在校园里采集的，由于角度问题，行人的移动变化明显，所以便于可视化）
 
-下图对比了改进后的圆形邻域预测模型与原来的矩形邻域预测模型，红色曲线是真实值（由于时间原因，只标注了一个视频，也是在校园里采集的，由于角度问题，行人的移动变化明显，所以便于可视化）;蓝色曲线是改进后的模型;绿色曲线是原来的矩形邻域模型。
+下图对比了改进后的圆形邻域预测模型与原来的矩形邻域预测模型，
+- 红色曲线是真实值;
+- 蓝色曲线是改进后的模型;
+- 绿色曲线是原来的矩形邻域模型。
 
 
 ![(1)](https://github.com/YapingZ/Pedestrian-behavior-trajectory-prediction/blob/master/picture/2.png)   ![(2)](https://github.com/YapingZ/Pedestrian-behavior-trajectory-prediction/blob/master/picture/0.png)
@@ -69,4 +74,6 @@ Run human_track_predict.py
 
 ![执行流图](https://github.com/YapingZ/Pedestrian-behavior-trajectory-prediction/blob/master/picture/1.png)
 
-
+## Restrictions
+- work only on batch size = 1
+- require much RAM (use almost all 16GB in my environment)
