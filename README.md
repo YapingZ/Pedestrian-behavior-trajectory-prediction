@@ -6,7 +6,7 @@
 - Opencv3.4 + contrib
 ***
 # Pedestrian detection 行人检测
--- yolo检测行人主程序
+-- yolo行人检测主程序
 ```yolo.py ```
 
 -- 执行程序
@@ -20,14 +20,14 @@
 ##  Training
 
 运行下面语句训练检测模型
-run ```python3 train.py```
+> run ```python3 train.py```
 
 训练好的权重放在model_data路径下
 
 ## Testing
 行人检测跟踪的测试，运行下面语句，input是输入视频，output是保存路径
-Run yolo_video.py 
-> ```python yolo_video.py --input test.mp4 --output cuc1.mp4```
+ 
+> run ```python yolo_video.py --input test.mp4 --output cuc1.mp4```
 
 ***
 # Pedestrian prediction 行人预测
@@ -37,18 +37,18 @@ Set dataset attribute of the config files in `configs/.`
 
 ## Training
 训练行人预测网络，运行下面语句，config设置网络超参数，out root路径保存模型
-Run train_social_model.py.
-> ```python3 train_social_model.py --config ./data/configs/ucy.jason --out root ./data/result/20190527/test=ucy/social_train_model_e0010.h5```
+
+>run ```python3 train_social_model.py --config ./data/configs/ucy.jason --out root ./data/result/20190527/test=ucy/social_train_model_e0010.h5```
 
 ## Testing
 测试行人预测网络，运行下面语句，
 Run evaluate_social_model.py， trained_model_config设置测试的超参数，trained_model_file路径指定测试使用的模型
-> ```python3 evaluate_social_my_model.py  --trained_model_config  /home/leonard/skk/social_lstm_keras_tf-master/data/configs/other.json --trained_model_file   /home/leonard/skk/social_lstm_keras_tf-master/data/results/20190527/test=ucy/social_train_model_e0010.h5```
+> run ```python3 evaluate_social_my_model.py  --trained_model_config  /home/leonard/skk/social_lstm_keras_tf-master/data/configs/other.json --trained_model_file   /home/leonard/skk/social_lstm_keras_tf-master/data/results/20190527/test=ucy/social_train_model_e0010.h5```
 
 ## 融合模型执行文件
 测试融合模型，运行下面语句，input是待测试视频
 Run human_track_predict.py 
-> ```python3.5 human_track_predict.py --input test.mp4 ```
+> run ```python3.5 human_track_predict.py --input test.mp4 ```
 
 
 ## 论文模型和原来模型的对比
