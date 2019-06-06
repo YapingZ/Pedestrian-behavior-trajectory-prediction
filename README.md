@@ -58,7 +58,7 @@ Run human_track_predict.py
 ![(1)](https://github.com/YapingZ/Pedestrian-behavior-trajectory-prediction/blob/master/picture/2.png)   ![(2)](https://github.com/YapingZ/Pedestrian-behavior-trajectory-prediction/blob/master/picture/0.png)
 
 
-![(3)](https://github.com/YapingZ/Pedestrian-behavior-trajectory-prediction/blob/master/picture/3.png)   ![(4)](https://github.com/YapingZ/Pedestrian-behavior-trajectory-prediction/blob/master/picture/4.png)
+![(3)](https://github.com/YapingZ/Pedestrian-behavior-trajectory-prediction/blob/master/picture/4.png)   ![(4)](https://github.com/YapingZ/Pedestrian-behavior-trajectory-prediction/blob/master/picture/3.png)
 
 ## 所有的程序合成一个文件human_track_predict.py
 
