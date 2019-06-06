@@ -50,5 +50,6 @@ Run human_track_predict.py
 - require much RAM (use almost all 16GB in my environment)
 
 ## 执行步骤
-![image](https://github.com/YapingZ/Pedestrian-behavior-trajectory-prediction/tree/master/picture/1.png)
+
+![执行流图](https://github.com/YapingZ/Pedestrian-behavior-trajectory-prediction/tree/master/picture/1.png)
 
