@@ -1,3 +1,4 @@
+#加载所使用到的库
 import os
 from argparse import Namespace, ArgumentParser
 from shutil import copyfile
@@ -20,8 +21,8 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 def load_train_args() -> Namespace:  #默认输入输出路径
     parser = ArgumentParser()
-    parser.add_argument("--config", type=str, default="data/configs/zara1.json")
-    parser.add_argument("--out_root", type=str, default="data/results")
+    parser.add_argument("--config", type=str, default="data/configs/zara1.json")#配置文件所在的路径
+    parser.add_argument("--out_root", type=str, default="data/results")#将训练结果存至该路径下
     return parser.parse_args()
 
 
@@ -30,7 +31,7 @@ def _make_weights_file_name(n_epochs: int) -> str:   #返回训练权重
 
 def plt_save_loss(config, out_dir, history_obj):   #保存训练过程loss曲线图
 
-
+#绘制训练过程中的loss曲线
     plt.plot(history_obj["loss"])
     plt.plot(history_obj["val_loss"])
     plt.title("social model loss")
@@ -88,7 +89,7 @@ def train_social_model(out_dir: str, config: ModelConfig) -> None:
         batch_size=config.batch_size,
         epochs=config.n_epochs,
         verbose=1,
-        # steps_per_epoch=config.steps_per_epoch,
+       
         validation_data=(
             [x_obs_len_test, grid_obs_len_test, zeros_obs_len_test],
             y_pred_len_test
@@ -111,7 +112,7 @@ def main():
     is_plt_loss = False
 
     # 'circle', 'rect
-    grid_type = 'circle'
+    grid_type = 'circle'    #设置训练的模型是矩形邻域还是圆形邻域
 
     args = load_train_args()
     config = load_model_config(args.config)
@@ -124,7 +125,7 @@ def main():
 
     if is_plt_loss:
         my_model = MySocialModel(config)
-        weights_file = 'data/results/20181122135218_circle/test=zara1/social_train_model_e0002.h5'
+        weights_file = 'data/results/20181122135218_circle/test=zara1/social_train_model_e0002.h5'  
         my_model.train_model.save_weights(weights_file)
 
         history_file = os.path.join(out_dir, "history.json")

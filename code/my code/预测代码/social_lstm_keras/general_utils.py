@@ -5,15 +5,15 @@ from enum import unique, Enum, auto
 from typing import Union, List
 
 out_dim = 5
-# pxy = pedestrian, x pos, y pos
+
 pxy_dim = 3
 
 
 @unique
 class DatasetKind(Enum):
-    """Human-trajectory datasets used in the Social Model paper."""
-    eth = auto()
-    hotel = auto()
+    """论文中所使用的数据集"""
+    
+    
     zara1 = auto()
     zara2 = auto()
     ucy = auto()
@@ -21,7 +21,7 @@ class DatasetKind(Enum):
     students003 = auto()
 
 
-# image size (width, height) for each dataset to compute grid
+# 用于计算网格的每个数据集的图像大小（宽度，高度）
 _image_size_dict = {
     DatasetKind.eth: [640, 480],
     DatasetKind.hotel: [720, 576],
@@ -32,7 +32,7 @@ _image_size_dict = {
     DatasetKind.students003: [720, 576]
 }
 
-# relative path to data dir for each dataset
+# 每个数据集的数据目录的相对路径
 _rel_data_dir_dict = {
     DatasetKind.eth: "eth/univ",
     DatasetKind.hotel: "eth/hotel",

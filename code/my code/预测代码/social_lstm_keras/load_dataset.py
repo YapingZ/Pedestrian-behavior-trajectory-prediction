@@ -42,8 +42,8 @@ class SingleDataset:
             nf_data = frame_data[i + 1:i + self.seq_len + 1, ...]
 
             ped_col_index = 0
-            # collect ped ids where the ped id exists in the all frame of
-            # the current sequence and the next sequence
+            # 将当前序列中行人的id和下个序列中行人的id分开保存
+           
             cf_ped_ids = reduce(set.intersection,
                                 [set(nf_ped_ids) for nf_ped_ids in
                                  cf_data[..., ped_col_index]])
@@ -53,14 +53,14 @@ class SingleDataset:
                                  nf_data[..., ped_col_index]])
 
             ped_ids = list(cf_ped_ids & nf_ped_ids - {0})
-            # at current & next frame, there are no pedestrians
+            # 判断当前时刻是否有行人
             if not ped_ids:
                 continue
 
             x = np.zeros((self.seq_len, self.max_n_peds, 3))
             y = np.zeros((self.seq_len, self.max_n_peds, 3))
 
-            # fi = frame index, cf = current frame, nf = next frame
+            # fi 表示帧的索引号, cf 表示当前帧, nf 表示下一帧
             for fi, (cf, nf) in enumerate(zip(cf_data, nf_data)):
                 for j, ped_id in enumerate(ped_ids):
                     cf_ped_row = cf[:, 0] == ped_id
@@ -74,7 +74,7 @@ class SingleDataset:
             x_data.append(x)
             y_data.append(y)
 
-        # compute grid mask
+        
         grid_data = [grid_mask(x, self.image_size, self.config) for x in x_data]
 
         data_tuple = (np.array(x_data, np.float32),
@@ -93,10 +93,7 @@ class _SingleDatasetLoader:
     def __init__(self, data_dir, dataset_kind, config):
 
         self.data_dir = data_dir
-        # self.seq_len = config.obs_len + config.pred_len
-        # self.max_n_peds = config.max_n_peds
-        # self.n_neighbor_pixels = config.n_neighbor_pixels
-        # self.grid_side = config.grid_side
+        
         self.dataset_kind = dataset_kind
         self.image_size = get_image_size(dataset_kind)
 
@@ -107,7 +104,7 @@ class _SingleDatasetLoader:
             self.data_dir, self.dataset_kind)
         df = preprocessor.preprocess_frame_data()
 
-        # All frame IDs in the current dataset
+        # 当前数据库中的所有帧的行人ID
         all_frames = df["frame"].unique().tolist()
         n_all_frames = len(all_frames)
 

@@ -21,27 +21,18 @@ def grid_mask(x, image_size, config):
 
 
 def _tf_grid_mask_frame(frame, image_size, n_neighbor_pixels, grid_side):
-    """Compute a grid mask for TensorFlow.
-
-    :param frame:
-    :param image_size:
-    :param n_neighbor_pixels:
-    :param grid_side:
-    :return:
-    """
+   
     max_n_peds = frame.shape.as_list()[0]
     pids = frame[:, 0]
 
-    # --------------------
-    # compute id_mask
-    # --------------------
+    
 
     def compute_id_mask(pids):
         id_mask = tf.tensordot(tf.expand_dims(pids, axis=1),
                                tf.transpose(tf.expand_dims(pids, axis=1)),
                                axes=(1, 0))
         id_mask = tf.cast(id_mask, tf.bool)
-        # mask self-to-self (diagonal elements)
+        
         id_mask = tf.logical_and(
             tf.logical_not(tf.cast(tf.eye(max_n_peds), tf.bool)), id_mask)
         id_mask = tf.expand_dims(id_mask, axis=2)
@@ -77,30 +68,29 @@ def _tf_grid_mask_frame(frame, image_size, n_neighbor_pixels, grid_side):
 
     frame_mask = tf.stack(frame_mask, axis=0)
     frame_mask = tf.cast(frame_mask, tf.float32)
-    # mask not exist elements & self-to-self pair
+  
     frame_mask *= id_mask
     return frame_mask
 
 
 def _grid_mask_frame(frame, image_size, config):
     """
-    This function computes the binary mask that represents the
-    occupancy of each ped in the other"s grid
-    params:
-    frame : (max_n_peds, 3)
-    image_size : [width, height]
-    n_neighbor_pixels : considered neighborhood pixels
-    grid_side : Scalar value representing the size of the grid discretization
+    此函数计算表示的二进制掩码
+ 
+    
+    image_size : 图像尺寸
+    n_neighbor_pixels : 邻域
+    grid_side : 标量值表示网格离散化的大小
     """
-    # Maximum number of pedestrians
+    # 保留序列最长的行人
     max_n_peds = frame.shape[0]
 
-    # compute mask array based on pid
+   
     pids = frame[:, 0]
     id_mask = np.dot(np.expand_dims(pids, axis=1),
                      np.expand_dims(pids, axis=1).T)
     id_mask[id_mask > 0] = 1
-    # mask self-to-self (diagonal elements)
+   
     id_mask *= ~np.eye(max_n_peds).astype(np.bool)
     id_mask = np.expand_dims(id_mask, axis=2)
 
@@ -134,13 +124,10 @@ def _grid_mask_frame(frame, image_size, config):
         frame_mask.append(self_frame_mask)
 
     frame_mask = np.stack(frame_mask, axis=0)
-    # mask not exist elements & self-to-self pair
+  
     frame_mask *= id_mask
 
-    # frame_mask_legacy = _legacy_grid_mask_frame(frame, image_size,
-    #                                             n_neighbor_pixels,
-    #                                             grid_side)
-    # assert np.array_equal(frame_mask, frame_mask_legacy)
+
     return frame_mask
 
 
@@ -209,44 +196,44 @@ def _legacy_grid_mask_frame(frame, image_size, n_neighbor_pixels, grid_side):
     width_bound = n_neighbor_pixels / width
     height_bound = n_neighbor_pixels / height
 
-    # For each ped in the frame (existent and non-existent)
+    # 遍历当前帧中的每个行人序列
     for self_index in range(max_n_peds):
-        # If pedID is zero, then non-existent ped
+        # 如果pedID为零，则不存在行人
         if frame[self_index, 0] == 0:
-            # Binary mask should be zero for non-existent ped
+            # 对于不存在的行人，二进制掩码为零
             continue
 
-        # Get x and y of the current ped
+        # 获取当前行人的x和y坐标
         self_x, self_y = frame[self_index, 1], frame[self_index, 2]
 
         tl_x, br_x = self_x - width_bound / 2, self_x + width_bound / 2
         tl_y, br_y = self_y - height_bound / 2, self_y + height_bound / 2
 
-        # For all the other peds
+        # 遍历所有的行人
         for other_index in range(max_n_peds):
-            # If other pedID is zero, then non-existent ped
+            
             if frame[other_index, 0] == 0:
-                # Binary mask should be zero
+               
                 continue
 
-            # If the other pedID is the same as current pedID
+           
             if frame[other_index, 0] == frame[self_index, 0]:
-                # The ped cannot be counted in his own grid
+           
                 continue
 
-            # Get x and y of the other ped
+            # 获得另一个行人的x和y坐标
             other_x, other_y = frame[other_index, 1], frame[other_index, 2]
             if other_x >= br_x or other_x < tl_x \
                     or other_y >= br_y or other_y < tl_y:
-                # Ped not in surrounding, so binary mask should be zero
+                # 如果目标行人周围没有干扰物，则二元掩模为零
                 continue
 
-            # If in surrounding, calculate the grid cell
+            # 如果周围有别的行人，计算与目标行人的距离
             cell_x = int(np.floor(((other_x - tl_x) / width_bound) * grid_side))
             cell_y = int(
                 np.floor(((other_y - tl_y) / height_bound) * grid_side))
 
-            # Other ped is in the corresponding grid cell of current ped
+            
             frame_mask[self_index, other_index, cell_x + cell_y * grid_side] = 1
 
     return frame_mask

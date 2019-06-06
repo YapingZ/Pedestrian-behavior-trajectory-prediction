@@ -3,7 +3,7 @@ import tensorflow as tf
 import tensorflow.contrib.distributions as ds
 from keras.layers import Multiply
 from keras.layers import Reshape, Lambda, Concatenate
-
+#数据正规化是将数据的每个样本变换为单位范数的向量
 
 def _to_normal2d(output_batch) -> ds.MultivariateNormalTriL:
 
