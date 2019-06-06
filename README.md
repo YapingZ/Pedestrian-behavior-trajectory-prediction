@@ -53,3 +53,5 @@ Run human_track_predict.py
 
 ![执行流图](https://github.com/YapingZ/Pedestrian-behavior-trajectory-prediction/tree/master/picture/1.png)
 
+![test image](https://github.com/YapingZ/Pedestrian-behavior-trajectory-prediction/blob/master/picture/%E5%8A%A8%E4%BD%9C%E5%88%86%E7%B1%BB.png)
+
